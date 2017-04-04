@@ -44,16 +44,16 @@ module Daltonize(input clk, input [31:0] RedIn, [31:0] GreenIn, [31:0] BlueIn,in
     RedOut, GreenOut, BlueOut
     );
     
-    assign MatrixA[0] = A;
-    assign MatrixA[1] = B;
-    assign MatrixA[2] = C;
-                 
-    assign MatrixA[3] = D;
-    assign MatrixA[4] = E;
-    assign MatrixA[5] = F;
-                 
-    assign MatrixA[6] = G;
-    assign MatrixA[7] = H;
-    assign MatrixA[8] = I;
+    //sign MatrixA[0] = A;
+    //sign MatrixA[1] = B;
+    //sign MatrixA[2] = C;
+    //           
+    //sign MatrixA[3] = D;
+    //sign MatrixA[4] = E;
+    //sign MatrixA[5] = F;
+    //           
+    //sign MatrixA[6] = G;
+    //sign MatrixA[7] = H;
+    //sign MatrixA[8] = I;
        
 endmodule

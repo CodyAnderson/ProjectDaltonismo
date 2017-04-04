@@ -9,7 +9,17 @@
 // Target Devices: Digilent Nexys Video
 // Tool Versions: Vivado 2015.4
 // Description: Turns a serial stream into ten bit parallel data.
+// Inputs:
+// clk_mgmt   - 100Mhz clock for management.
+// clk        - HDMI clock signal, 1/10 the data rate.
+// clkx5      - Data clock, 1/2 data rate (uses DDR).
+// reset      - Resets stuff.
+// bitslip    - Tells the serializer to drop one bit (shifts data by one bit).
+// delayCount - amount of delay that gets added to the data signals.
+// serial     - HDMI serial data line.
 // 
+// Outputs:
+// parallel   - The 10-bit HDMI symbol.
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -19,16 +29,16 @@ module Deserializer(
     input clkx5,
     input reset,
     input logic bitslip,
-    input [4:0]delay_count,
+    input [4:0]delayCount,
     input serial,
     output [9:0]parallel
     );
     
-    logic clockDelay = 1;
-    always_ff@(posedge clk)
-    begin
-      clockDelay <= ~reset;
-    end
+    // logic clockDelay = 1;
+    // always_ff@(posedge clk)
+    // begin
+    //   clockDelay <= ~reset;
+    // end
     logic shift1;
     logic shift2;
     logic delayed;
@@ -65,7 +75,7 @@ module Deserializer(
               .C(clk_mgmt),
               .CE('b0),
               .CINVCTRL('b0),
-              .CNTVALUEIN(delay_count),
+              .CNTVALUEIN(delayCount),
               .INC('b0),
               .LD('b1),
               .LDPIPEEN('b0),

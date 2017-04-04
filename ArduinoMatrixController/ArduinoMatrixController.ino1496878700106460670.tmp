@@ -1,0 +1,40 @@
+
+void setup() {
+  // initialize the serial communication:
+  Serial.begin(3000000);
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+}
+
+void loop() {
+    const double rwgt = 0.3086;
+    const double gwgt = 0.6094;
+    const double bwgt = 0.0820;
+    double sat = analogRead(A0);
+    double multiplier = analogRead(A1) + 1;
+    sat /= 1023/2;
+    sat -= 1;
+    multiplier /= 8;
+    sat *= multiplier;
+    //Serial.println(sat);
+    Serial.print(" 0x");
+    Serial.print((int32_t)(((1.0-sat)*rwgt + sat)* 65536),HEX);
+    Serial.print(" 0x");
+    Serial.print((int32_t)(((1.0-sat)*gwgt )* 65536),HEX);
+    Serial.print(" 0x");
+    Serial.print((int32_t)(((1.0-sat)*bwgt )* 65536),HEX);
+    Serial.print(" 0x");
+    Serial.print((int32_t)(((1.0-sat)*rwgt )* 65536),HEX);
+    Serial.print(" 0x");
+    Serial.print((int32_t)(((1.0-sat)*gwgt + sat)* 65536),HEX);
+    Serial.print(" 0x");
+    Serial.print((int32_t)(((1.0-sat)*bwgt )* 65536),HEX);
+    Serial.print(" 0x");
+    Serial.print((int32_t)(((1.0-sat)*rwgt )* 65536),HEX);
+    Serial.print(" 0x");
+    Serial.print((int32_t)(((1.0-sat)*gwgt )* 65536),HEX);
+    Serial.print(" 0x");
+    Serial.println((int32_t)(((1.0-sat)*bwgt + sat)* 65536),HEX);
+    delay(50);
+}

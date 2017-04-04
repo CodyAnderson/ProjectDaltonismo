@@ -26,7 +26,7 @@
 module top_module(
     input logic clk,
     input logic [7:0]sw,
-    input logic uart_tx_in,
+    input logic ja0,
     output logic uart_rx_out,
     //input logic btnC,
     
@@ -53,6 +53,10 @@ module top_module(
     
     output logic [4:0]led
     );
+
+logic uart_tx_in;
+assign uart_tx_in = ja0;
+
 
   logic clkfb_2;
   logic reset;

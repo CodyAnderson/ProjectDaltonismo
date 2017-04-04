@@ -27,80 +27,103 @@ module HdmiInputChannel(
     output [9:0] symbol
     );
     
-    //////////////////
-    // Input Buffer
-    //////////////////
+      ///////////////
+     // Input Buffer
+    ///////////////
     logic SerIn;
     IBUFDS #(.IOSTANDARD("TMDS_33")) 
         SerialBufIn  (  .O(serIn),   .I(hdmi_rx_p),  .IB(hdmi_rx_n));
         
-    /////////////////////////////
-    //  InputDelay/Deserializer
-    /////////////////////////////
+      ///////////////////////////
+     //  InputDelay/Deserializer
+    ///////////////////////////
     logic slip;
     logic [4:0]autoDelay;
     Deserializer Deserial(clk100,clk,clkx5,reset,slip,autoDelay,serIn,symbol);
     
-    /////////////////////////
-    //  TMDS Symbol Decoder
-    /////////////////////////
+      ///////////////////////
+     //  TMDS Symbol Decoder
+    ///////////////////////
     logic symbolGood;
     TmdsDecoder Decode(clk,symbol,symbolGood,dataOut,syncOut);
     
+      //////////////////////////////
+     //  Automatic Symbol Alignment
+    //////////////////////////////
+    AutoAlign SymbolAlign(clk, reset, symbolGood, slip, autoDelay, dataValid);
 
-    logic [23:0]goodCount;
-    logic [3:0]bitSlips;
-    logic [2:0]validWait;
-    logic oneExtra;
     
-    always@(posedge clk)
+    
+endmodule
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// Company: DigiPen Institute of Technology
+// Engineer: Ben Nollan
+//           Cody Anderson
+// 
+// Module Name: HdmiInputChannel
+// Project Name: Daltonismo
+// Target Devices: Digilent Nexys Video
+// Tool Versions: Vivado 2016.4
+// Description: Handles alignment and delay of one of the HDMI signals.
+// 
+// 
+//////////////////////////////////////////////////////////////////////////////////
+module AutoAlign(input clk, reset, symbolGood, output logic slip, [4:0]delay, logic dataValid);
+  logic [23:0]goodCount;
+  logic [3:0]bitSlips;
+  logic [2:0]validWait;
+  logic oneExtra;
+  
+  always@(posedge clk)
+  begin
+    if(reset)
     begin
-      if(reset)
-      begin
-        autoDelay <= 0;
-        bitSlips <= 0;
-      end
+      delay <= 0;
+      bitSlips <= 0;
+    end
 
-      if(bitSlips == 11)
+    if(bitSlips == 11) //If all alignments have been tried, increase signal delay.
+    begin
+      delay <= delay + 1;
+      bitSlips <= 0;
+    end
+    if(validWait == 0) //If waited for things to settle.
+    begin
+      if(symbolGood == 0) //If the current symbol is invalid.
       begin
-        autoDelay <= autoDelay + 1;
-        bitSlips <= 0;
+        slip <= 1; //Perform one bitslip.
+        bitSlips <= bitSlips + 1; //Increase the count of bitslips.
       end
-      if(validWait == 0)
-      begin
-        if(symbolGood == 0)
-        begin
-          slip <= 1;
-          bitSlips <= bitSlips + 1;
-        end
-      end //if(validWait == 0)
-      else
-        slip <= 0;
-      validWait <= validWait + 1;
-      
-      if(symbolGood)
-      begin
-        if(goodCount < 24'hFFFFFF)
-          goodCount <= goodCount + 1;
-        else
-          dataValid <= 1;
-      end
-      else
-      begin
-        dataValid <= 0;
-        goodCount <= 0;
-        oneExtra <= 0;
-      end
-
-      if(dataValid && !oneExtra && !validWait)
-      begin
-        autoDelay <= autoDelay + 1;
-        oneExtra <= 1;
-      end
-
-      
-    end //always@(posedge HdmiClk)
+    end //if(validWait == 0)
+    else 
+      slip <= 0;
+    validWait <= validWait + 1;
     
+    if(symbolGood) //Count the number of good symbols.
+    begin
+      if(goodCount < 24'hFFFFFF)
+        goodCount <= goodCount + 1;
+      else
+        dataValid <= 1; // Assume the data is valid if 16 million symbols are valid.
+    end
+    else //If symbol is invalid
+    begin
+      dataValid <= 0; //Data isn't valid
+      goodCount <= 0;
+      oneExtra <= 0;
+    end
+
+    if(dataValid && !oneExtra && !validWait) //Adds one more delay to fix some instability.
+    begin
+      delay <= delay + 1;
+      oneExtra <= 1;
+    end
+
+    
+  end //always@(posedge clk)
 endmodule
 
 

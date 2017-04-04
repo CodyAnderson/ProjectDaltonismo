@@ -17,7 +17,7 @@
 module TmdsEncoder(
           input logic clk,
           input logic [7:0] dataIn,
-          output logic [9:0] TmdsOut,
+          output logic [9:0] tmdsOut,
           input logic [2:0] syncs
           );
            
@@ -45,15 +45,11 @@ module TmdsEncoder(
   assign xnored[8] = 'b0;
   
   logic [4:0]ones;
-  //assign ones = 5'b0 + dataIn[0] + dataIn[1] + dataIn[2] + dataIn[3] +
-  //               dataIn[4] + dataIn[5] + dataIn[6] + dataIn[7];
   always_comb 
   begin
-    ones = '0;  
-    foreach(dataIn[idx]) 
-    begin
-      ones += dataIn[idx];
-    end
+    ones = 0;  
+    foreach(dataIn[i]) 
+      ones += dataIn[i];
   end
                  
   logic [8:0]minimized;
@@ -65,39 +61,42 @@ module TmdsEncoder(
       minimized = xored;
   end
   
- 
   logic [7:0]dcBalance; //Running sum of balance of ones and zeros
   initial 
   begin
   dcBalance = 127;
-  TmdsOut = 0;
+  tmdsOut = 0;
   end
   
   logic [4:0]minOnes;
-  assign minOnes = minimized[0] + minimized[1] + minimized[2] + minimized[3] + 
-                        minimized[4] + minimized[5] + minimized[6] + minimized[7];
+  always_comb
+  begin
+    minOnes = 0;
+    foreach(minimized[i])
+      minOnes += minimized[i];
+  end
                         
   always@(posedge clk)
   begin
     if(syncs[0]) //if in blank region
     begin
       case(syncs[2:1])
-        0: TmdsOut <= 'b1101010100;
-        1: TmdsOut <= 'b0010101011;
-        2: TmdsOut <= 'b0101010100;
-        3: TmdsOut <= 'b1010101011;
+        0: tmdsOut <= 'b1101010100;
+        1: tmdsOut <= 'b0010101011;
+        2: tmdsOut <= 'b0101010100;
+        3: tmdsOut <= 'b1010101011;
       endcase
     end
     else //if not in blank region
     begin
       if(((minOnes > 4)&& dcBalance[7])||((minOnes < 4) && !dcBalance[7])) //if the signal is getting too positive
       begin
-        TmdsOut <= {1'b1, minimized[8], ~minimized[7:0]}; //only invert the data bits
+        tmdsOut <= {1'b1, minimized[8], ~minimized[7:0]}; //only invert the data bits
         dcBalance <= (dcBalance + (8 - minOnes)) - 4;
       end
       else //if the signal is getting too negative
       begin
-        TmdsOut <= {1'b0, minimized[8:0]};
+        tmdsOut <= {1'b0, minimized[8:0]};
         dcBalance <= (dcBalance + minOnes) - 4;
       end
     end

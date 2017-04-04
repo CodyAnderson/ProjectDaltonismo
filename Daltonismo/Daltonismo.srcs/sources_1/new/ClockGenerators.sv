@@ -15,17 +15,17 @@
 
 
 module HdmiClockGen(
-            input logic clk_p,
-            input logic clk_n,
+            input logic clkP,
+            input logic clkN,
             output logic clk,
             output logic clkx5,
             output logic locked
     );
     
-    logic clkfb_2, inClk;
+    logic clkFB, inClk, clkx5Raw;
     
   IBUFDS #(.IOSTANDARD("TMDS_33")) 
-    ClkIn (    .O(inClk),    .I(clk_p), .IB(clk_n));
+    ClkIn (    .O(inClk),    .I(clkP), .IB(clkN));
    
     MMCME2_BASE #(
             .BANDWIDTH("OPTIMIZED"),      // Jitter programming (OPTIMIZED, HIGH, LOW)
@@ -67,7 +67,7 @@ module HdmiClockGen(
             .CLKOUT0B (),         // 1-bit output: Inverted CLKOUT0
             .CLKOUT1  (clk),      // 1-bit output: CLKOUT1
             .CLKOUT1B (),         // 1-bit output: Inverted CLKOUT1
-            .CLKOUT2  (clkx5_raw),// 1-bit output: CLKOUT2
+            .CLKOUT2  (clkx5Raw),// 1-bit output: CLKOUT2
             .CLKOUT2B (),         // 1-bit output: Inverted CLKOUT2
             .CLKOUT3  (),         // 1-bit output: CLKOUT3
             .CLKOUT3B (),         // 1-bit output: Inverted CLKOUT3
@@ -75,7 +75,7 @@ module HdmiClockGen(
             .CLKOUT5  (),         // 1-bit output: CLKOUT5
             .CLKOUT6  (),         // 1-bit output: CLKOUT6
             //// Feedback Clocks: 1-bit (each) output: Clock feedback ports
-            .CLKFBOUT (clkfb_2),  // 1-bit output: Feedback clock
+            .CLKFBOUT (clkFB),  // 1-bit output: Feedback clock
             .CLKFBOUTB(),         // 1-bit output: Inverted CLKFBOUT
             //// Status Ports: 1-bit (each) output: MMCM status ports
             .LOCKED   (locked),   // 1-bit output: LOCK
@@ -85,7 +85,7 @@ module HdmiClockGen(
             .PWRDWN   ('b0),      // 1-bit input: Power-down
             .RST      ('b0),      // 1-bit input: Reset
             //// Feedback Clocks: 1-bit (each) input: Clock feedback ports
-            .CLKFBIN  (clkfb_2)   // 1-bit input: Feedback clock
+            .CLKFBIN  (clkFB)   // 1-bit input: Feedback clock
          );
          
          
@@ -95,7 +95,7 @@ module HdmiClockGen(
               //// (this is only rated for 600MHz!)
               ////////////////////////////////////-  
           BUFIO BUFIO_inst(
-                 .O(clkx5), .I(clkx5_raw)
+                 .O(clkx5), .I(clkx5Raw)
               );  
 endmodule
 
@@ -119,7 +119,7 @@ module ClockDoubler(
             output logic clkOut
     );
     
-    logic clkfb;
+    logic clkFB;
 
    
     MMCME2_BASE #(
@@ -170,7 +170,7 @@ module ClockDoubler(
             .CLKOUT5  (),         // 1-bit output: CLKOUT5
             .CLKOUT6  (),         // 1-bit output: CLKOUT6
             //// Feedback Clocks: 1-bit (each) output: Clock feedback ports
-            .CLKFBOUT (clkfb),  // 1-bit output: Feedback clock
+            .CLKFBOUT (clkFB),  // 1-bit output: Feedback clock
             .CLKFBOUTB(),         // 1-bit output: Inverted CLKFBOUT
             //// Status Ports: 1-bit (each) output: MMCM status ports
             .LOCKED   (),   // 1-bit output: LOCK
@@ -180,7 +180,7 @@ module ClockDoubler(
             .PWRDWN   ('b0),      // 1-bit input: Power-down
             .RST      ('b0),      // 1-bit input: Reset
             //// Feedback Clocks: 1-bit (each) input: Clock feedback ports
-            .CLKFBIN  (clkfb)   // 1-bit input: Feedback clock
+            .CLKFBIN  (clkFB)   // 1-bit input: Feedback clock
          );
          
 endmodule

@@ -36,13 +36,26 @@ module Filter(
     
   
   logic [31:0] HSVred,HSVgreen,HSVblue;
+  logic [31:0] CLAMPred,CLAMPgreen,CLAMPblue;
   //RGBtoHSV filt1(clk, redIn, greenIn, blueIn, hue, sat, val);
   //Daltonizer colorCorrect(clk, hue, sat, val, correctedSat, correctedVal);
   
-  logic [31:0] matrix[9];
+  logic [31:0] matrixIn[16];
+  logic [31:0] matrixOut[16];
+  logic matrixDone, matrixBuffedIn = 0;
+  MatrixReceiver Jamal(clk100Mhz, uart_tx_in, matrixBuffedIn, matrixDone, uart_rx_out, matrixIn);
   
-  MatrixReceiver Jamal(clk100Mhz, uart_tx_in, uart_rx_out, matrix);
-  
+  always_ff@(posedge clk)
+  begin
+    if(matrixDone && syncIn[2])
+    begin
+      matrixBuffedIn <= 1;
+      matrixOut <= matrixIn;
+    end
+    else
+      matrixBuffedIn <= 0;
+  end
+
   logic [7:0] satRGB;
   logic [7:0] valRGB;
   //HSVtoRGB filt2(clk, hueDelayed,satRGB, valRGB, HSVred, HSVgreen, HSVblue);
@@ -60,20 +73,72 @@ module Filter(
     clk,
     {8'b0,redIn,16'b0}, {8'b0,greenIn,16'b0}, {8'b0,blueIn,16'b0},
     
-     matrix[0], matrix[1], matrix[2],
-     matrix[3], matrix[4], matrix[5],
-     matrix[6], matrix[7], matrix[8],
+     matrixOut[0], matrixOut[1], matrixOut[2],
+     matrixOut[3], matrixOut[4], matrixOut[5],
+     matrixOut[6], matrixOut[7], matrixOut[8],
     // 65536,0,0,
     // 0,65536,0,
     // 0,0,65536,
     
-    HSVred, HSVgreen, HSVblue
+    CLAMPred, CLAMPgreen, CLAMPblue
     );
     
-  DelaySignal #(.DATA_WIDTH(3),.DELAY_CYCLES(20)) SyncDelay(clk,syncIn, syncOut);
+  DelaySignal #(.DATA_WIDTH(3),.DELAY_CYCLES(36)) SyncDelay(clk,syncIn, syncOut);
   logic [2:0]currentFilter;
   always@(posedge clk)
   begin
+  
+    ////CLAMP RED
+    //If the red number is beigger than 255
+    if(CLAMPred[31] != 1'b1 && CLAMPred[31:16] > 255)
+        begin
+            HSVred[23:16] <= 255;
+        end
+    //If the red number is negative
+    else if(CLAMPred[31])
+        begin
+            HSVred[23:16] <= 0;
+        end
+    //Otherwise
+    else
+        begin
+            HSVred <= CLAMPred;
+        end
+        
+    ////CLAMP GREEN
+    //If the green number is beigger than 255
+    if(CLAMPgreen[31] != 1'b1 && CLAMPgreen[31:16] > 255)
+        begin
+            HSVgreen[23:16] <= 255;
+        end
+    //If the green number is negative
+    else if(CLAMPgreen[31])
+        begin
+            HSVgreen[23:16] <= 0;
+        end
+    //Otherwise
+    else
+        begin
+            HSVgreen <= CLAMPgreen;
+        end
+        
+    ////CLAMP BLUE
+    //If the blue number is beigger than 255
+    if(CLAMPblue[31] != 1'b1 && CLAMPblue[31:16] > 255)
+        begin
+            HSVblue[23:16] <= 255;
+        end
+    //If the blue number is negative
+    else if(CLAMPblue[31])
+        begin
+            HSVblue[23:16] <= 0;
+        end
+    //Otherwise
+    else
+        begin
+            HSVblue <= CLAMPblue;
+        end
+  
     case(currentFilter)
       0:begin
         redOut <= HSVred[23:16];
