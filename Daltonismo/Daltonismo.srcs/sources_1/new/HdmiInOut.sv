@@ -23,8 +23,7 @@ module HdmiInputChannel(
     input reset,
     output logic dataValid,
     output logic [2:0] syncOut,
-    output [7:0] dataOut,
-    output [9:0] symbol
+    output [7:0] dataOut
     );
     
       ///////////////
@@ -39,6 +38,7 @@ module HdmiInputChannel(
     ///////////////////////////
     logic slip;
     logic [4:0]autoDelay;
+    logic [9:0]symbol;
     Deserializer Deserial(clk100,clk,clkx5,reset,slip,autoDelay,serIn,symbol);
     
       ///////////////////////
@@ -149,27 +149,26 @@ module HdmiOutputChannel(
     output hdmi_tx_n,
     input reset,
     input [2:0] syncs,
-    input [7:0] dataIn,
-    input [9:0] symbolIn,
-    input useSymbol
+    input [7:0] dataIn
     );
     
+    ///////////////
+   // Tmds Encoder
+  ///////////////
   logic [9:0]encodedSym;
   TmdsEncoder EncodeBlue(clk,dataIn,encodedSym,syncs);
   
-  logic [9:0]symOut;
-  Serializer SerialOut(clk,clkx5,symOut,reset,serOut);
-    
+
+    /////////////
+   // Serializer
+  /////////////
+  Serializer SerialOut(clk,clkx5,encodedSym,reset,serOut);
+
+
+    ////////////////
+   // Output Buffer
+  ////////////////  
   OBUFDS #(.IOSTANDARD("TMDS_33"),.SLEW("FAST")) 
     SerialBufOut  (.O(hdmi_tx_p), .OB(hdmi_tx_n), .I(serOut));  
-    
-    
-  always_comb
-  begin
-    if(useSymbol)
-      symOut = encodedSym;
-    else
-      symOut = symbolIn;
-  end
     
 endmodule
