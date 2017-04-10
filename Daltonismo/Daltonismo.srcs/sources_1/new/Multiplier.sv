@@ -1,4 +1,68 @@
 `timescale 1ns / 1ps
+
+
+
+
+
+module VectorMatrixMultiplier(
+      clk,
+      vectorIn,
+      
+      matrix,
+      
+      vectorOut
+      );
+    parameter MATRIX_COLUMNS = 4;
+    parameter MATRIX_ROWS = 4;
+    parameter NUMBER_WIDTH = 16;
+    parameter NUMBER_DECIMALS = 8;
+    
+    parameter PRODUCT_WIDTH = 32;
+    parameter PRODUCT_DECIMALS = 16;
+    
+    //the clk
+    input clk;
+    
+    //The Input Vector
+    input [NUMBER_WIDTH - 1:0] vectorIn[MATRIX_COLUMNS];
+    
+    //The Matrix
+    input [NUMBER_WIDTH - 1:0] matrix[MATRIX_ROWS * MATRIX_COLUMNS];
+    
+    //The Output Vector
+    output logic [PRODUCT_WIDTH - 1:0] vectorOut[MATRIX_ROWS];
+    
+    logic [NUMBER_WIDTH - 1:0] tempValues[MATRIX_ROWS * MATRIX_COLUMNS];
+
+    genvar curRow;
+    genvar curCol;
+
+    generate
+      for(curRow = 0; curRow < MATRIX_ROWS; curRow++)
+      begin
+        for(curCol = 0; curCol < MATRIX_COLUMNS; curCol++)
+        begin
+          SignedFixedPointMultiplier #(.NUMBER_WIDTH(NUMBER_WIDTH), .MULTIPLIER_WIDTH(NUMBER_WIDTH), .PRODUCT_WIDTH(PRODUCT_WIDTH),
+          .NUMBER_DECIMALS(NUMBER_DECIMALS), .MULTIPLIER_DECIMALS(NUMBER_DECIMALS), .PRODUCT_DECIMALS(PRODUCT_DECIMALS)) 
+          Mult(clk, vectorIn[curCol], matrix[curRow * MATRIX_ROWS + curCol], tempValues[curRow * MATRIX_ROWS + curCol]);
+        end
+      end
+    endgenerate
+
+    always_comb
+    begin
+      for(integer curRow = 0; curRow < MATRIX_ROWS; curRow++)
+      begin
+        vectorOut[curRow] = 0;
+        for(integer curCol = 0; curCol < MATRIX_COLUMNS; curCol++)
+        begin
+          vectorOut += tempValues[curRow * MATRIX_ROWS + curCol];
+        end
+      end
+    end
+      
+endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: DigiPen Institute of Technology
 // Engineer: Ben Nollan
