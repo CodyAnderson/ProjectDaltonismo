@@ -334,3 +334,78 @@ begin
   end
 end
 endmodule
+
+///////////////////////////////////////////////////////////////////////////////
+// Company: DigiPen Institute of Technology
+// Engineer: Ben Nollan
+//           Cody Anderson
+// 
+// Module Name: MatrixReceiverBuffered
+// Project Name: Daltonismo
+// Target Devices: Digilent Nexys Video
+// Tool Versions: Vivado 2016.4
+// Description: Inputs three matricies from UART and has a buffer for good ones.
+// Inputs:
+//  clk - internal reference clock
+//  rx - the UART reception pin.
+//  load - triggers a write to the buffer if a new matrix exists.
+//  
+// Outputs:
+//  tx          - an echo of the data received.
+//  matrixOne   - the 1st 4x4 matrix that has been read.
+//  matrixTwo   - the 2nd 4x4 matrix that has been read.
+//  matrixThree - the 3rd 4x4 matrix that has been read.
+// 
+///////////////////////////////////////////////////////////////////////////////
+
+module MatrixReceiverBuffered(
+        input clk, rx, load,
+        output logic tx,
+        logic[NUMBER_OF_BITS-1:0] matrixOneBuffered[16] =   {65536,    0,    0,    0,
+                                                                 0,65536,    0,    0,
+                                                                 0,    0,65536,    0,
+                                                                 0,    0,    0,    1},
+
+        logic[NUMBER_OF_BITS-1:0] matrixTwoBuffered[16] =   {    0,    0,    0,    0,
+                                                                 0,    0,    0,    0,
+                                                                 0,    0,    0,    0,
+                                                                 0,    0,    0,    0},
+         
+        logic[NUMBER_OF_BITS-1:0]matrixThreeBuffered[16] = {65536,    0,    0,    0,
+                                                                0,65536,    0,    0,
+                                                                0,    0,65536,    0,
+                                                                0,    0,    0,    1}
+        );
+parameter NUMBER_OF_BITS = 32;
+logic [31:0] matrixOne[16];
+  logic [31:0] matrixTwo[16];
+  logic [31:0] matrixThree[16];
+  logic [2:0]matrixDone;
+  logic [2:0]matrixBuffedIn = 3'b0;
+  MatrixReceiver Jamal(clk100Mhz, uart_tx_in, matrixBuffedIn, matrixDone, uart_rx_out, matrixOne, matrixTwo, matrixThree);
+  
+  always_ff@(posedge clk)
+  begin
+    if(matrixDone[0] && load)
+    begin
+      matrixBuffedIn[0] <= 1;
+      matrixOneBuffered <= matrixOne;
+    end
+    else
+      matrixBuffedIn[0] <= 0;
+    if(matrixDone[1] && load)
+    begin
+      matrixBuffedIn[1] <= 1;
+      matrixTwoBuffered <= matrixTwo;
+    end
+    else
+      matrixBuffedIn[1] <= 0;
+    if(matrixDone[2] && load)
+    begin
+      matrixBuffedIn[2] <= 1;
+      matrixThreeBuffered <= matrixThree;
+    end
+    else
+      matrixBuffedIn[2] <= 0;
+  end
+endmodule

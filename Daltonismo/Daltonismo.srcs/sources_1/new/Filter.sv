@@ -29,234 +29,30 @@ module Filter(
     output logic [7:0] greenOut,
     output logic [7:0] blueOut
     );
-  logic [2:0]filterStage;
-  logic [8:0] frames;
 
-  
-    
-  
-  logic [31:0] HSVred,HSVgreen,HSVblue;
-  logic [31:0] CLAMPred,CLAMPgreen,CLAMPblue;
-  //RGBtoHSV filt1(clk, redIn, greenIn, blueIn, hue, sat, val);
-  //Daltonizer colorCorrect(clk, hue, sat, val, correctedSat, correctedVal);
   
   logic [31:0] matrixOne[16];
-  logic [31:0] matrixOneBuffered[16];
   logic [31:0] matrixTwo[16];
-  logic [31:0] matrixTwoBuffered[16];
   logic [31:0] matrixThree[16];
-  logic [31:0] matrixThreeBuffered[16];
-  logic [2:0]matrixDone;
-  logic [2:0]matrixBuffedIn = 3'b0;
-  MatrixReceiver Jamal(clk100Mhz, uart_tx_in, matrixBuffedIn, matrixDone, uart_rx_out, matrixIn);
-  
-  always_ff@(posedge clk)
-  begin
-    if(matrixDone[0] && syncIn[2])
-    begin
-      matrixBuffedIn[0] <= 1;
-      matrixOneBuffered <= matrixOne;
-    end
-    else
-      matrixBuffedIn[0] <= 0;
-    if(matrixDone[1] && syncIn[2])
-    begin
-      matrixBuffedIn[1] <= 1;
-      matrixTwoBuffered <= matrixTwo;
-    end
-    else
-      matrixBuffedIn[1] <= 0;
-    if(matrixDone[2] && syncIn[2])
-    begin
-      matrixBuffedIn[2] <= 1;
-      matrixThreeBuffered <= matrixThree;
-    end
-    else
-      matrixBuffedIn[2] <= 0;
-  end
+  MatrixReceiverBuffered Jamal(clk100Mhz, uart_tx_in, syncIn[2], uart_rx_out, matrixOne, matrixTwo, matrixThree);
 
-  logic [7:0] satRGB;
-  logic [7:0] valRGB;
-  //HSVtoRGB filt2(clk, hueDelayed,satRGB, valRGB, HSVred, HSVgreen, HSVblue);
-  //Daltonize filt1(clk, {8'b0,redIn,16'b0}, {8'b0,greenIn,16'b0}, {8'b0,blueIn,16'b0}, HSVred, HSVgreen, HSVblue, matrix);
-  parameter NUM_WID = 32;
-    parameter NUM_DEC = 16;
-    
-    parameter PROD_WID = 32;
-    parameter PROD_DEC = 16;
-
-    ThreeByThreeMatrixMultiplier
-    #(.NUMBER_WIDTH(NUM_WID), .NUMBER_DECIMALS(NUM_DEC),
-    .PRODUCT_WIDTH(PROD_WID), .PRODUCT_DECIMALS(PROD_DEC))
-    Daltonismonster(
-    clk,
-    {8'b0,redIn,16'b0}, {8'b0,greenIn,16'b0}, {8'b0,blueIn,16'b0},
-    
-     matrixOut[0], matrixOut[1], matrixOut[2],
-     matrixOut[3], matrixOut[4], matrixOut[5],
-     matrixOut[6], matrixOut[7], matrixOut[8],
-    // 65536,0,0,
-    // 0,65536,0,
-    // 0,0,65536,
-    
-    CLAMPred, CLAMPgreen, CLAMPblue
-    );
-    
-  DelaySignal #(.DATA_WIDTH(3),.DELAY_CYCLES(36)) SyncDelay(clk,syncIn, syncOut);
-  logic [2:0]currentFilter;
-  always@(posedge clk)
-  begin
-  
-    ////CLAMP RED
-    //If the red number is beigger than 255
-    if(CLAMPred[31] != 1'b1 && CLAMPred[31:16] > 255)
-        begin
-            HSVred[23:16] <= 255;
-        end
-    //If the red number is negative
-    else if(CLAMPred[31])
-        begin
-            HSVred[23:16] <= 0;
-        end
-    //Otherwise
-    else
-        begin
-            HSVred <= CLAMPred;
-        end
-        
-    ////CLAMP GREEN
-    //If the green number is beigger than 255
-    if(CLAMPgreen[31] != 1'b1 && CLAMPgreen[31:16] > 255)
-        begin
-            HSVgreen[23:16] <= 255;
-        end
-    //If the green number is negative
-    else if(CLAMPgreen[31])
-        begin
-            HSVgreen[23:16] <= 0;
-        end
-    //Otherwise
-    else
-        begin
-            HSVgreen <= CLAMPgreen;
-        end
-        
-    ////CLAMP BLUE
-    //If the blue number is beigger than 255
-    if(CLAMPblue[31] != 1'b1 && CLAMPblue[31:16] > 255)
-        begin
-            HSVblue[23:16] <= 255;
-        end
-    //If the blue number is negative
-    else if(CLAMPblue[31])
-        begin
-            HSVblue[23:16] <= 0;
-        end
-    //Otherwise
-    else
-        begin
-            HSVblue <= CLAMPblue;
-        end
-  
-    case(currentFilter)
-      0:begin
-        redOut <= HSVred[23:16];
-        greenOut <= HSVgreen[23:16];
-        blueOut <= HSVblue[23:16];
-      end
-      1:begin
-        redOut <= (HSVred[23:16] + HSVgreen[23:16])/2;
-        greenOut <= (HSVred[23:16] + HSVgreen[23:16])/2;
-        blueOut <= HSVblue[23:16];
-      end
-      2:begin
-        redOut <= HSVred[23:16];
-        greenOut <= HSVgreen[23:16];
-        blueOut <= HSVblue[23:16];
-      end
-      3:begin
-        redOut <= (HSVred[23:16] + HSVgreen[23:16])/2;
-        greenOut <= (HSVred[23:16] + HSVgreen[23:16])/2;
-        blueOut <= HSVblue[23:16];
-      end
-      4:begin
-        redOut <= ~HSVred[23:16];
-        greenOut <= ~HSVgreen[23:16];
-        blueOut <= ~HSVblue[23:16];
-      end
-      default:begin
-        redOut <= HSVred[23:16];
-        greenOut <= HSVgreen[23:16];
-        blueOut <= HSVblue[23:16];
-      end
-      endcase
-  end
-  
-  
-  logic [19:0]count;
-  logic lSwitchState;
-  logic [15:0]hPos;
-  logic [15:0]hSize;
-  logic [15:0]vPos;
-  logic [15:0]vSize;
-  always@(posedge clk)
-  begin
-    if(!syncOut[0])
-    begin
-      hPos <= hPos + 1;
-    end
-    if(syncOut[0] && syncOut[1] && hPos)
-    begin
-      vPos <= vPos + 1;
-      hSize <= hPos;
-      hPos <= 0;
-    end
-    if(syncOut[0] && syncOut[2] && vPos)
-    begin
-      if(frames  >= 9'h17F)
-          frames <= 0;
-      else
-        frames <= frames + 1;
-      vSize <= vPos;
-      vPos <= 0;
-    end
-      
-    case(switcher)
-      0:begin
-        currentFilter <= switcher;
-      end
-      1:begin
-        currentFilter <= switcher;
-      end
-      2:begin
-        currentFilter <= switcher;
-      end
-      3:begin
-        currentFilter <= switcher;
-      end
-      4:begin
-        currentFilter[2] <= 0;
-        if(hPos < hSize / 2)
-          currentFilter[0] <= 0;
-        else
-          currentFilter[0] <= 1;
-          
-        if(vPos < vSize / 2)
-          currentFilter[1] <= 0;
-        else
-          currentFilter[1] <= 1;
-      end
-      6:begin
-        currentFilter <= 4;
-      end
-      default:begin
-        currentFilter <= 0;
-      end
-    endcase
-    
-  end
     
 endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 module Daltonizer(
