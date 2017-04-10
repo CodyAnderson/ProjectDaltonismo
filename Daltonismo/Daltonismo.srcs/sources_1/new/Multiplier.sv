@@ -56,7 +56,7 @@ module VectorMatrixMultiplier(
         vectorOut[curRow] = 0;
         for(integer curCol = 0; curCol < MATRIX_COLUMNS; curCol++)
         begin
-          vectorOut += tempValues[curRow * MATRIX_ROWS + curCol];
+          vectorOut[curRow] += tempValues[curRow * MATRIX_ROWS + curCol];
         end
       end
     end
