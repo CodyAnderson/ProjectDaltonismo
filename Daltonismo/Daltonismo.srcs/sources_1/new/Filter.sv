@@ -40,20 +40,39 @@ module Filter(
   //RGBtoHSV filt1(clk, redIn, greenIn, blueIn, hue, sat, val);
   //Daltonizer colorCorrect(clk, hue, sat, val, correctedSat, correctedVal);
   
-  logic [31:0] matrixIn[16];
-  logic [31:0] matrixOut[16];
-  logic matrixDone, matrixBuffedIn = 0;
+  logic [31:0] matrixOne[16];
+  logic [31:0] matrixOneBuffered[16];
+  logic [31:0] matrixTwo[16];
+  logic [31:0] matrixTwoBuffered[16];
+  logic [31:0] matrixThree[16];
+  logic [31:0] matrixThreeBuffered[16];
+  logic [2:0]matrixDone;
+  logic [2:0]matrixBuffedIn = 3'b0;
   MatrixReceiver Jamal(clk100Mhz, uart_tx_in, matrixBuffedIn, matrixDone, uart_rx_out, matrixIn);
   
   always_ff@(posedge clk)
   begin
-    if(matrixDone && syncIn[2])
+    if(matrixDone[0] && syncIn[2])
     begin
-      matrixBuffedIn <= 1;
-      matrixOut <= matrixIn;
+      matrixBuffedIn[0] <= 1;
+      matrixOneBuffered <= matrixOne;
     end
     else
-      matrixBuffedIn <= 0;
+      matrixBuffedIn[0] <= 0;
+    if(matrixDone[1] && syncIn[2])
+    begin
+      matrixBuffedIn[1] <= 1;
+      matrixTwoBuffered <= matrixTwo;
+    end
+    else
+      matrixBuffedIn[1] <= 0;
+    if(matrixDone[2] && syncIn[2])
+    begin
+      matrixBuffedIn[2] <= 1;
+      matrixThreeBuffered <= matrixThree;
+    end
+    else
+      matrixBuffedIn[2] <= 0;
   end
 
   logic [7:0] satRGB;
