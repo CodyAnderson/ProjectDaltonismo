@@ -110,7 +110,7 @@ assign uart_tx_in = ja0;
   logic [7:0]redDataOut;
   logic [7:0]greenDataOut;
   logic [7:0]blueDataOut;  
-  Filter SuperFilter(HdmiClk,clk, sw[7:5], uart_tx_in, uart_rx_out, syncIn, redDataIn, greenDataIn, blueDataIn, syncOut, redDataOut, greenDataOut, blueDataOut);
+  Filter SuperFilter(HdmiClk,clk, sw[2:0], uart_tx_in, uart_rx_out, syncIn, redDataIn, greenDataIn, blueDataIn, syncOut, redDataOut, greenDataOut, blueDataOut);
   
   logic useSymbol;
   assign useSymbol = 1'b1; //!sw[6];
