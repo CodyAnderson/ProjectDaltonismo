@@ -69,69 +69,106 @@ assign uart_tx_in = ja0;
   assign led[0] = !hdmi_tx_hpd;
   
   
+
+    /////////////////////////
+   // Monitor Identification
+  /////////////////////////
   edid_rom I2C(clk, hdmi_rx_scl, hdmi_rx_sda);
   
   
+
+    ///////////////////////
+   // HDMI Clock Generator
+  ///////////////////////
   logic HdmiClk;
   logic HdmiClkx5;
+  logic locked;
+  assign led[1] = locked;
   HdmiClockGen HDMIclk(hdmi_rx_clk_p, hdmi_rx_clk_n, HdmiClk, HdmiClkx5, locked);               
   
-  assign led[1] = locked;
   
   
+    /////////////////////////
+   // 200Mhz Clock Generator
+  /////////////////////////
   logic clk_200;
   ClockDoubler Mhz200(clk, clk_200 ); //Used as a reference clock for IDELAY Control
+
+
+    //////////////
+   // Delay Tuner
+  //////////////
   IDELAYCTRL IDELAYCTRL(
             .RDY(),    // 1-bit output: Ready output
             .REFCLK(clk_200), // 1-bit input:  Reference clock input
             .RST('b0)      // 1-bit input:  Active high reset input
         );
 
-  logic redValidSymbol;
-  logic greenValidSymbol;
-  logic blueValidSymbol;
-  assign led[4] = redValidSymbol;
-  assign led[3] = greenValidSymbol;
-  assign led[2] = blueValidSymbol;
+  
+  
+  
+  
+  
+  
+    /////////////////
+   // Input Channels
+  /////////////////
+
   logic [2:0]syncIn;
-  logic [7:0]redDataIn;
-  logic [7:0]greenDataIn;
   logic [7:0]blueDataIn; 
-  logic [9:0]blueSymbolIn; 
-  logic [9:0]greenSymbolIn; 
-  logic [9:0]redSymbolIn; 
-  HdmiInputChannel BlueInput (clk, HdmiClk, HdmiClkx5, hdmi_rx_p[0], hdmi_rx_n[0], reset, blueValidSymbol, syncIn, blueDataIn , blueSymbolIn);
+  logic blueValidSymbol;
+  assign led[2] = blueValidSymbol;
+
+  HdmiInputChannel BlueInput (clk, HdmiClk, HdmiClkx5, hdmi_rx_p[0], hdmi_rx_n[0], reset, blueValidSymbol, syncIn, blueDataIn);
+
   
-  HdmiInputChannel GreenInput(clk, HdmiClk, HdmiClkx5, hdmi_rx_p[1], hdmi_rx_n[1], reset, greenValidSymbol,      , greenDataIn, greenSymbolIn);
+  logic [7:0]greenDataIn;
+  logic greenValidSymbol;
+  assign led[3] = greenValidSymbol;
+
+  HdmiInputChannel GreenInput(clk, HdmiClk, HdmiClkx5, hdmi_rx_p[1], hdmi_rx_n[1], reset, greenValidSymbol,      , greenDataIn);
+
   
-  HdmiInputChannel RedInput  (clk, HdmiClk, HdmiClkx5, hdmi_rx_p[2], hdmi_rx_n[2], reset, redValidSymbol,        , redDataIn  , redSymbolIn);
+  logic [7:0]redDataIn;
+  logic redValidSymbol;
+  assign led[4] = redValidSymbol;
+
+  HdmiInputChannel RedInput  (clk, HdmiClk, HdmiClkx5, hdmi_rx_p[2], hdmi_rx_n[2], reset, redValidSymbol,        , redDataIn);
   
+
+
+
+
+
   logic [2:0]syncOut;
   logic [7:0]redDataOut;
   logic [7:0]greenDataOut;
   logic [7:0]blueDataOut;  
-  Filter SuperFilter(HdmiClk,clk, sw[7:5], uart_tx_in, uart_rx_out, syncIn, redDataIn, greenDataIn, blueDataIn, syncOut, redDataOut, greenDataOut, blueDataOut);
+  Filter SuperFilter(HdmiClk,clk, sw[2:0], uart_tx_in, uart_rx_out, syncIn, redDataIn, greenDataIn, blueDataIn, syncOut, redDataOut, greenDataOut, blueDataOut);
   
-  logic useSymbol;
-  assign useSymbol = 1'b1; //!sw[6];
-  HdmiOutputChannel BlueOutput (HdmiClk, HdmiClkx5, hdmi_tx_p[0], hdmi_tx_n[0], reset, syncOut            , blueDataOut,  blueSymbolIn,  useSymbol);
+
+
+    //////////////////
+   // Output Channels
+  //////////////////
+  HdmiOutputChannel BlueOutput (HdmiClk, HdmiClkx5, hdmi_tx_p[0], hdmi_tx_n[0], reset, syncOut            , blueDataOut);
   
-  HdmiOutputChannel GreenOutput(HdmiClk, HdmiClkx5, hdmi_tx_p[1], hdmi_tx_n[1], reset, {2'b00, syncOut[0]}, greenDataOut, greenSymbolIn, useSymbol);
+  HdmiOutputChannel GreenOutput(HdmiClk, HdmiClkx5, hdmi_tx_p[1], hdmi_tx_n[1], reset, {2'b00, syncOut[0]}, greenDataOut);
   
-  HdmiOutputChannel RedOutput  (HdmiClk, HdmiClkx5, hdmi_tx_p[2], hdmi_tx_n[2], reset, {2'b00, syncOut[0]}, redDataOut,   redSymbolIn,   useSymbol);
+  HdmiOutputChannel RedOutput  (HdmiClk, HdmiClkx5, hdmi_tx_p[2], hdmi_tx_n[2], reset, {2'b00, syncOut[0]}, redDataOut);
   
 
         
           
-      
- 
+    //////////////////
+   // Clock Generator
+  //////////////////
   Serializer SerialClock(HdmiClk,HdmiClkx5,'b1110000011,reset,serOutClock);
   
   
-  ////////////////////
-  //// Output Buffers
-  ////////////////////
-  
+    //////////////////////
+   // Output Clock Buffer
+  //////////////////////
   OBUFDS #(.IOSTANDARD("TMDS_33"),.SLEW("FAST")) 
     ClkOut   (.O(hdmi_tx_clk_p),.OB(hdmi_tx_clk_n),.I(serOutClock));
 endmodule
