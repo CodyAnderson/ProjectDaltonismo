@@ -34,8 +34,10 @@ module Filter(
   logic [31:0] matrixOne[16];
   logic [31:0] matrixTwo[16];
   logic [31:0] matrixThree[16];
-  MatrixReceiverBuffered Jamal(clk100Mhz, uart_tx_in, syncIn[2], uart_rx_out, matrixOne, matrixTwo, matrixThree);
+  MatrixReceiverBuffered Getter(clk100Mhz, uart_tx_in, syncIn[2], uart_rx_out, matrixOne, matrixTwo, matrixThree);
 
+  
+  
     
 endmodule
 
