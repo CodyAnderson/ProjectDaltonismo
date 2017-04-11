@@ -207,3 +207,17 @@ Affine Inverse(const Affine& A)
   newA[2][3] = translation[2];
   return newA;
 }
+
+Affine Transpose(const Affine& A)
+{
+  Affine newOne;
+  for(int i = 0; i < 4; ++i)
+  {
+    for(int j = 0; j < 4; ++j)
+    {
+      newOne[i][j] = A[j][i];
+    }
+  }
+  return newOne;
+}
+

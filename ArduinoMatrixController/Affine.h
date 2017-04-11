@@ -60,6 +60,8 @@ Affine Scale(float r);
 Affine Scale(float rx, float ry, float rz);
 Affine Inverse(const Affine& A);
 
+Affine Transpose(const Affine& A);
+
 
 #endif
 

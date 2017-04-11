@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
 // Company: DigiPen Institute of Technology
 // Engineer: Ben Nollan
 //           Cody Anderson
@@ -11,7 +11,7 @@
 // Description: Applies a filter to the video data that is passed in.
 // 
 // 
-//////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
 
 
 module Filter(
@@ -34,9 +34,16 @@ module Filter(
   logic [31:0] matrixOne[16];
   logic [31:0] matrixTwo[16];
   logic [31:0] matrixThree[16];
-  MatrixReceiverBuffered Jamal(clk100Mhz, uart_tx_in, syncIn[2], uart_rx_out, matrixOne, matrixTwo, matrixThree);
+  MatrixReceiverBuffered Getter(clk100Mhz, uart_tx_in, syncIn[2], uart_rx_out, matrixOne, matrixTwo, matrixThree);
 
-    
+  logic [2:0] syncOutSim;
+  logic [7:0] redOutSim;
+  logic [7:0] greenOutSim;
+  logic [7:0] blueOutSim;
+  
+  CVDCompensation COM(clk, switcher[0], syncIn, redIn, greenIn, blueIn, matrixTwo, matrixThree, syncOutSim, redOutSim, greenOutSim, blueOutSim);
+  CVDSimulation SIM(clk, switcher[1], syncOutSim, redOutSim, greenOutSim, blueOutSim, matrixOne, syncOut, redOut, greenOut, blueOut);
+   
 endmodule
 
 
