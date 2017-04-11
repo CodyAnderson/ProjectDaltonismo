@@ -15,10 +15,10 @@ const Matrix Protanopia =    Transpose(Affine(Vector(.57, .43,   0),
                                     Vector(  0, .24, .76),
                                     Point(   0,   0,   0)));
                                     
-const Matrix Protanomaly =   Affine(Vector(.82, .18,   0),
+const Matrix Protanomaly =   Transpose(Affine(Vector(.82, .18,   0),
                                     Vector(.33, .67,   0),
                                     Vector(  0, .13, .88), 
-                                    Point(   0,   0,   0));
+                                    Point(   0,   0,   0)));
                                     
 const Matrix Deuteranopia =  Affine(Vector(.63, .38,   0),
                                     Vector( .7,  .3,   0),
@@ -54,19 +54,19 @@ const Matrix InverseM = Affine(Vector(-1,0,0),
                               Vector(0,0,-1),
                               Point(1,1,1));
 
-const Matrix Simulation = Transpose(Scale(1.f/65536.f)*
+const Matrix ProCompensation = Transpose(Scale(1.f/65536.f)*
                                     Affine(Vector(7365, 58170, 0),
                                            Vector(7365, 58170 , 0),
                                            Vector(262, -262, 65536), 
                                            Point(0,0,0)));
 
-const Matrix Adjustment = Transpose(Scale(1.f/65536.f)*
+const Matrix ProAdjustment = Transpose(Scale(1.f/65536.f)*
                                     Affine(Vector(0, 0, 0),
                                            Vector(45875, 65536,0),
                                            Vector(45875, 0, 65536), 
                                            Point(0,0,0)));
 
-const Matrix Compensation = Transpose(Affine(Vector(0, 0.0332818, -0.0877292),Vector(0, 0.033282, -0.0877289),Vector(0, -0.00486077, 0.694434),Point(0,0,0)));
+const Matrix Compensation2 = Transpose(Affine(Vector(0, 0.0332818, -0.0877292),Vector(0, 0.033282, -0.0877289),Vector(0, -0.00486077, 0.694434),Point(0,0,0)));
 
 void setup() {
   // initialize the serial communication:
@@ -89,14 +89,14 @@ void loop() {
     while(1)
     {
       static double t = 0;
-      t += 0.01;
+      t += 0.1;
       static char value = 0;
-      PrintMatrix(Protanopia,1);
-      PrintMatrix(Simulation,2);
-      PrintMatrix(Adjustment,3);
+      //PrintMatrix(Protanopia,1);
+      PrintMatrix(ProCompensation,2);
+      PrintMatrix(ProAdjustment,3);
       
       value++;
-      //PrintMatrix(Scale(value),1);
+      PrintMatrix(Scale(sin(t)+1),1);
     //PrintMatrix(Trans(Vector(value*255 + 255/3, value*255 + 2*255/3, value*255)),1);
     delay(20);
     }
