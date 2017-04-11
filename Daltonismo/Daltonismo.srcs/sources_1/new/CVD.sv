@@ -117,13 +117,13 @@ module CVDCompensation(
     
     DelaySignal #(.DATA_WIDTH(3),.DELAY_CYCLES(75)) SyncDelay(clk,syncIn, syncOut);
   
-    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) RedDelay(clk,{8'b0,redIn,16'b0}, delayedRedIn);
-    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) GreenDelay(clk,{8'b0,greenIn,16'b0}, delayedGreenIn);
-    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) BlueDelay(clk,{8'b0,blueIn,16'b0}, delayedBlueIn);
+    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(35)) RedDelay(clk,{8'b0,redIn,16'b0}, delayedRedIn);
+    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(35)) GreenDelay(clk,{8'b0,greenIn,16'b0}, delayedGreenIn);
+    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(35)) BlueDelay(clk,{8'b0,blueIn,16'b0}, delayedBlueIn);
     
-    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) RedDelayAGAIN(clk,delayedRedIn, delayedAgainRedIn);
-    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) GreenDelayAGAIN(clk,delayedGreenIn, delayedAgainGreenIn);
-    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) BlueDelayAGAIN(clk,delayedBlueIn, delayedAgainBlueIn);
+    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(35)) RedDelayAGAIN(clk,delayedRedIn, delayedAgainRedIn);
+    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(35)) GreenDelayAGAIN(clk,delayedGreenIn, delayedAgainGreenIn);
+    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(35)) BlueDelayAGAIN(clk,delayedBlueIn, delayedAgainBlueIn);
     
     DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) RedDiffDelay(clk,diffRed, delayedDiffRed);
     DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) GreenDiffDelay(clk,diffGreen, delayedDiffGreen);
@@ -244,11 +244,11 @@ module CVDSimulation(
     logic [31:0] HSVgreen;
     logic [31:0] HSVblue;
     
-    DelaySignal #(.DATA_WIDTH(3),.DELAY_CYCLES(36)) SyncDelay(clk,syncIn, syncOut);
+    DelaySignal #(.DATA_WIDTH(3),.DELAY_CYCLES(35)) SyncDelay(clk,syncIn, syncOut);
   
-    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) RedDelay(clk,{8'b0,redIn,16'b0}, delayedRedIn);
-    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) GreenDelay(clk,{8'b0,greenIn,16'b0}, delayedGreenIn);
-    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(36)) BlueDelay(clk,{8'b0,blueIn,16'b0}, delayedBlueIn);
+    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(35)) RedDelay(clk,{8'b0,redIn,16'b0}, delayedRedIn);
+    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(35)) GreenDelay(clk,{8'b0,greenIn,16'b0}, delayedGreenIn);
+    DelaySignal #(.DATA_WIDTH(32),.DELAY_CYCLES(35)) BlueDelay(clk,{8'b0,blueIn,16'b0}, delayedBlueIn);
     
     
     ThreeByThreeMatrixMultiplier
