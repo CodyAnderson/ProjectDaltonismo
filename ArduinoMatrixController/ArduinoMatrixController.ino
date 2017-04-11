@@ -66,6 +66,8 @@ const Matrix Adjustment = Transpose(Scale(1.f/65536.f)*
                                            Vector(45875, 0, 65536), 
                                            Point(0,0,0)));
 
+const Matrix Compensation = Transpose(Affine(Vector(0, 0.0332818, -0.0877292),Vector(0, 0.033282, -0.0877289),Vector(0, -0.00486077, 0.694434),Point(0,0,0)));
+
 void setup() {
   // initialize the serial communication:
   Serial.begin(2000000);
@@ -89,11 +91,13 @@ void loop() {
       static double t = 0;
       t += 0.01;
       static char value = 0;
-      PrintMatrix(Simulation,1);
-      PrintMatrix(Adjustment,2);
-      PrintMatrix(Protanopia,3);
-//      value++;
-//    PrintMatrix(Trans(Vector(value*255 + 255/3, value*255 + 2*255/3, value*255)),1);
+      PrintMatrix(Protanopia,1);
+      PrintMatrix(Simulation,2);
+      PrintMatrix(Adjustment,3);
+      
+      value++;
+      //PrintMatrix(Scale(value),1);
+    //PrintMatrix(Trans(Vector(value*255 + 255/3, value*255 + 2*255/3, value*255)),1);
     delay(20);
     }
     //double multiplier = analogRead(A1) + 1;
