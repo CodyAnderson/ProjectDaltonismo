@@ -89,14 +89,14 @@ void loop() {
     while(1)
     {
       static double t = 0;
-      t += 0.1;
-      static char value = 0;
-      //PrintMatrix(Protanopia,1);
+      t += 0.01;
+      double value;
+      PrintMatrix(Protanopia,1);
       PrintMatrix(ProCompensation,2);
       PrintMatrix(ProAdjustment,3);
       
-      value++;
-      PrintMatrix(Scale(sin(t)+1),1);
+      value = sin(t);
+      //PrintMatrix(Scale(128) * Trans(Vector(-value/2-0.5f,-value/2-0.5f,-value/2-0.5f)),1);
     //PrintMatrix(Trans(Vector(value*255 + 255/3, value*255 + 2*255/3, value*255)),1);
     delay(20);
     }
