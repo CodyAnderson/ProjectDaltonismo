@@ -1,0 +1,39 @@
+PosterText:
+  Project Daltonismo
+  
+  Cody Anderson
+  Ben Nollan
+  
+  DigiPen Institute of Technology
+
+  1: Problem
+    1.1: CVD
+      Suffers of Color Vision Deficiency (CVD), commonly known as colorblindness, have a reduced ability to percieve differences between certain colors due to a reduction in color reception in the eye. In addition to changes in the aesthetic appearance of certain objects, CVD can also effect the ability of sufferers to carryout technical tasks in which color decernment is neccessary or required. Videogames often rely on color to tell several objects from each other or important objects from unimportant objects, which can leave CVD sufferers at a relatively disadvantage. More and more modern videogame titles are implimenting CVD modes and CVD compensation, but the majority of videogames produced in the past have no such modes and are unlikely to be patched by their respective companies to add such functionality. 
+  2: Solution
+    Project Daltonismo offers CVD compensation by running Daltonization, a popular CVD compensation algorithm, on a video signal in real time. In order for Project Daltonismo to target the largest number of devices currently on the market and which will come out in the future, the type of video signal compensated for is HDMI. HDMI is the ideal video standard for this project due to its current ubiquity in the video source market. Compensation must be done in realtime in as little delay as possible due to the fast paced requirements of many videogames. In order to //TBD//TBD//TBD
+    2.2: Constraints
+      2.2.1: Compensate for CVD
+        2.2.1.1: Daltonization
+      2.2.2: On modern hardware
+        2.2.2.1: HDMI
+      2.2.3: In real (enough) time
+        2.2.3.1: FPGA
+      2.2.4: Potential ability to use custom CVD types
+        2.2.4.1: More than just a lookup table
+  3: Daltonization
+    3.1: How to
+      3.1.1: Simulate sufferers' CVD
+      3.1.2: Find difference between CVD and full color
+      3.1.3: Negate difference and add back to original color
+      3.1.4: Project colors back into sufferers' visible spectrum
+  4: HDMI
+    4.1: All devices have HDMI these days
+    4.2: TMDS
+    4.3: Audio
+      4.3.1: Pretend it doesn't exist, fuck THAT shit
+  5: FPGA
+    5.1: Allows for many unique operations to be done simultaneously
+    5.2: Delays lower than a frame time
+    5.3: Takes NO compute time and adds no additional load away from an existing CPU/GPU
+  6: More than just a lookup table
+    6.1: TBD
