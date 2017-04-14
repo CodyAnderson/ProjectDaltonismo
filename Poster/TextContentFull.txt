@@ -10,7 +10,6 @@ PosterText:
     1.1: CVD
       Suffers of Color Vision Deficiency (CVD), commonly known as colorblindness, have a reduced ability to percieve differences between certain colors due to a reduction in color reception in the eye. In addition to changes in the aesthetic appearance of certain objects, CVD can also effect the ability of sufferers to carryout technical tasks in which color decernment is neccessary or required. Videogames often rely on color to tell several objects from each other or important objects from unimportant objects, which can leave CVD sufferers at a relatively disadvantage. More and more modern videogame titles are implimenting CVD modes and CVD compensation, but the majority of videogames produced in the past have no such modes and are unlikely to be patched by their respective companies to add such functionality. 
   2: Solution
-    Project Daltonismo offers CVD compensation by running Daltonization, a popular CVD compensation algorithm, on a video signal in real time. In order for Project Daltonismo to target the largest number of devices currently on the market and which will come out in the future, the type of video signal compensated for is HDMI. HDMI is the ideal video standard for this project due to its current ubiquity in the video source market. Compensation must be done in realtime in as little delay as possible due to the fast paced requirements of many videogames. In order to //TBD//TBD//TBD
     2.2: Constraints
       2.2.1: Compensate for CVD
         2.2.1.1: Daltonization
@@ -20,20 +19,29 @@ PosterText:
         2.2.3.1: FPGA
       2.2.4: Potential ability to use custom CVD types
         2.2.4.1: More than just a lookup table
+    Project Daltonismo offers CVD compensation by running Daltonization, a popular CVD compensation algorithm, on a video signal in real time. In order for Project Daltonismo to target the largest number of devices currently on the market and which will come out in the future, the type of video signal compensated for is HDMI. HDMI is the ideal video standard for this project due to its current ubiquity in the video source market. Compensation must be done in realtime in as little delay as possiblein order to meet the fast paced requirements of many videogames. In order to meet these time needs, it was decidede that Daltonization had to be done pixel by pixel as the pixel values arrive, allowing for the delay time be lesser than the time it takes to display one full frame. In addition to the speed advantage, the method of running Daltonization on an FPGA allows for the math for Daltonization to be done in real time instead of using a color lookup table as some implimentations may benefit from. Since the math is being done in real time, the CVD matricies can actuyally be customizewd in real time for the specific user.
   3: Daltonization
     3.1: How to
       3.1.1: Simulate sufferers' CVD
       3.1.2: Find difference between CVD and full color
       3.1.3: Negate difference and add back to original color
-      3.1.4: Project colors back into sufferers' visible spectrum
+      3.1.4: #Project colors back into sufferers' visible spectrum
+    At a basic level, Daltonization works in 3 main steps.
+      -First, CVD is simulated on the input color.
+      -Second, the output of the last operation is subtracted from the original input color.
+      -Lastly, this resulting difference is then added back to the original color.
+    This results in the difference in colors being amplified and brings them into a more perceptible state for sufferers of CVD. The only thing that has to be done to change the type of CVD being compensated for is to change the values modeling the type of CVD in the first step. The rest of the algorithm is identical from there on out. What this allows for is the manual input of mathematical models for atypical CVD types, or just one's personal vision type. For this manual input, the device does not need to be reprogrammed and it can be done instantly in real time.
   4: HDMI
     4.1: All devices have HDMI these days
     4.2: TMDS
     4.3: Audio
       4.3.1: Pretend it doesn't exist, fuck THAT shit
+    HDMI offers a lot to Project Daltonismo. Currently the most popular standard for video signals with no signs of changing, HDMI support allows Project Daltonismo to be compatible with a very large portion of currently existing HDMI devices. The two main problems is that Project Daltonismo currently can't handle HDMI signals containing audio, so a device to remove audio from a signal may be neccessary in some setups and Project Daltonismo currently has no support of HDCP encryption found in some HDMI devices. Since this encryption is designed to stop the recording and modification of HDMI streams, it would be out of scope of this project to impliment a work around for HDCP. Instead, there are devices on the market which will remove HDCP encrytion from HDMI streams, which may be neccessary for some newer and more secure video sources.
   5: FPGA
     5.1: Allows for many unique operations to be done simultaneously
     5.2: Delays lower than a frame time
     5.3: Takes NO compute time and adds no additional load away from an existing CPU/GPU
-  6: More than just a lookup table
-    6.1: TBD
+    Project Daltonismo gains a lot from being run on an FPGA. The ability for an FPGA to run many, many pieces of logic allows for many operationjs to be completed simultaneously, as opposed to sequentially as they would have to be done on a CPU. A GPU implimentation would allow for all pixels of a frame to be operated on simultaneously, but in several sequential steps, simular to how a CPU would, but in the case of a GPU inorder to take advantage of the parallel nature, a whole frame of delay would have to be added to the video signal. Currently, Project Daltonismo is running with around 100 pixels delay between pixel input and pixel output, which at a 1080p 60Hz resolution comes out to less then 1.5μs, compared to the ~16.7ms delay of waiting for a whole frame.
+  6: #More than just a lookup table
+    6.1: #TBD
+      #With the current design, Project Daltonismo could also be made into a dedicated ASIC for mass production. 
