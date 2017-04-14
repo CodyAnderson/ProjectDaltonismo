@@ -1,8 +1,77 @@
 #include "Affine.h"
 
+// Matrix one = simulation....
+// Matrix two = compensation...
+// Matrix three = adjustment...
+
+
+const Matrix Normal =        Affine(Vector(  1,   0,   0),
+                                    Vector(  0,   1,   0), 
+                                    Vector(  0,   0,   1),
+                                    Point(   0,   0,   0));
+                                    
+const Matrix Protanopia =    Transpose(Affine(Vector(.57, .43,   0),
+                                    Vector(.56, .44,   0),
+                                    Vector(  0, .24, .76),
+                                    Point(   0,   0,   0)));
+                                    
+const Matrix Protanomaly =   Transpose(Affine(Vector(.82, .18,   0),
+                                    Vector(.33, .67,   0),
+                                    Vector(  0, .13, .88), 
+                                    Point(   0,   0,   0)));
+                                    
+const Matrix Deuteranopia =  Affine(Vector(.63, .38,   0),
+                                    Vector( .7,  .3,   0),
+                                    Vector(  0,  .3,  .7),
+                                    Point(   0,   0,   0));
+                                    
+const Matrix Deuteranomaly = Affine(Vector( .8,  .2,   0),
+                                    Vector(.26, .74,   0),
+                                    Vector(  0, .14, .86),
+                                    Point(   0,   0,   0));
+                                    
+const Matrix Tritanopia =    Affine(Vector(.95, .05,   0),
+                                    Vector(  0, .43, .57), 
+                                    Vector(  0, .48, .53),
+                                    Point(   0,   0,   0));
+                                    
+const Matrix Tritanomaly =   Affine(Vector(.97, .03,   0),
+                                    Vector(  0, .73, .27),
+                                    Vector(  0, .18, .82),
+                                    Point(   0,   0,   0));
+                                    
+const Matrix Achromatopsia = Affine(Vector( .3, .59, .11),
+                                    Vector( .3, .59, .11),
+                                    Vector( .3, .59, .11),
+                                    Point(   0,   0,   0));
+                                    
+const Matrix Achromatomaly = Affine(Vector(.62, .32, .06),
+                                    Vector(.16, .78, .06),
+                                    Vector(.16, .32, .52),
+                                    Point(   0,   0,   0));
+const Matrix InverseM = Affine(Vector(-1,0,0),
+                              Vector(0,-1,0),
+                              Vector(0,0,-1),
+                              Point(1,1,1));
+
+const Matrix ProCompensation = Transpose(Scale(1.f/65536.f)*
+                                    Affine(Vector(7365, 58170, 0),
+                                           Vector(7365, 58170 , 0),
+                                           Vector(262, -262, 65536), 
+                                           Point(0,0,0)));
+
+const Matrix ProAdjustment = Transpose(Scale(1.f/65536.f)*
+                                    Affine(Vector(0, 0, 0),
+                                           Vector(45875, 65536,0),
+                                           Vector(45875, 0, 65536), 
+                                           Point(0,0,0)));
+
+const Matrix Compensation2 = Transpose(Affine(Vector(0, 0.0332818, -0.0877292),Vector(0, 0.033282, -0.0877289),Vector(0, -0.00486077, 0.694434),Point(0,0,0)));
+
 void setup() {
   // initialize the serial communication:
   Serial.begin(2000000);
+  //Serial.begin(115200);
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
@@ -16,7 +85,21 @@ void loop() {
     static float time = 0;
     sat = (float)analogRead(A0) / 64 - (1024/128);
     time += (float)analogRead(A1)/1024;
-    PrintMatrix(Rot(time, Vector(1,1,1))*Scale(sat));
+    //PrintMatrix(Rot(time, Vector(1,1,1))*Scale(sat), 1);
+    while(1)
+    {
+      static double t = 0;
+      t += 0.01;
+      double value;
+      PrintMatrix(Protanopia,1);
+      PrintMatrix(ProCompensation,2);
+      PrintMatrix(ProAdjustment,3);
+      
+      value = sin(t);
+      //PrintMatrix(Scale(128) * Trans(Vector(-value/2-0.5f,-value/2-0.5f,-value/2-0.5f)),1);
+    //PrintMatrix(Trans(Vector(value*255 + 255/3, value*255 + 2*255/3, value*255)),1);
+    delay(20);
+    }
     //double multiplier = analogRead(A1) + 1;
     //sat /= 1023/2;
     //sat -= 1;
@@ -41,17 +124,18 @@ void loop() {
 //    Serial.print((int32_t)(((1.0-sat)*gwgt )* 65536),HEX);
 //    Serial.print(" 0x");
 //    Serial.println((int32_t)(((1.0-sat)*bwgt + sat)* 65536),HEX);
-    delay(20);
+    delay(1000);
 }
 
-void PrintMatrix(const Matrix &m)
+void PrintMatrix(const Matrix &m, int spot)
 {
-  for(int i = 0; i < 3; ++i)
+  Serial.print(spot);
+  for(int i = 0; i < 4; ++i)
   {
-    for(int j = 0; j < 3; ++j)
+    for(int j = 0; j < 4; ++j)
     {
       Serial.print(" 0x");
-      Serial.print((int32_t)(m[j][i] * 65536),HEX);
+      Serial.print((int32_t)(m[i][j] * 65536),HEX);
     }
   }
   
