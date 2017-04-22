@@ -1,0 +1,37 @@
+PosterText:
+  Project Daltonismo
+  
+  Cody Anderson
+  Ben Nollan
+  
+  DigiPen Institute of Technology
+
+  1: Problem
+    1.1: CVD
+  2: Solution
+    2.2: Constraints
+      2.2.1: Compensate for CVD
+        2.2.1.1: Daltonization
+      2.2.2: On modern hardware
+        2.2.2.1: HDMI
+      2.2.3: In real (enough) time
+        2.2.3.1: FPGA
+      2.2.4: Potential ability to use custom CVD types
+        2.2.4.1: More than just a lookup table
+  3: Daltonization
+    3.1: How to
+      3.1.1: Simulate sufferers' CVD
+      3.1.2: Find difference between CVD and full color
+      3.1.3: Negate difference and add back to original color
+      3.1.4: Project colors back into sufferers' visible spectrum
+  4: HDMI
+    4.1: All devices have HDMI these days
+    4.2: TMDS
+    4.3: Audio
+      4.3.1: Pretend it doesn't exist, fuck THAT shit
+  5: FPGA
+    5.1: Allows for many unique operations to be done simultaneously
+    5.2: Delays lower than a frame time
+    5.3: Takes NO compute time and adds no additional load away from an existing CPU/GPU
+  6: More than just a lookup table
+    6.1: TBD
