@@ -3,7 +3,7 @@
 #define LEFT_BTN 8
 #define RIGHT_BTN 9
 #define CENTER_BTN 10
-#define STATE_MAX 5
+#define STATE_MAX 6
 #define TRANSITION_INCREMENT 0.1f
 
 // Matrix one = simulation....
@@ -26,35 +26,35 @@ const Matrix Protanomaly =   Transpose(Affine(Vector(.82, .18,   0),
                                     Vector(  0, .13, .88), 
                                     Point(   0,   0,   0)));
                                     
-const Matrix Deuteranopia =  Affine(Vector(.63, .38,   0),
+const Matrix Deuteranopia =  Transpose(Affine(Vector(.63, .38,   0),
                                     Vector( .7,  .3,   0),
                                     Vector(  0,  .3,  .7),
-                                    Point(   0,   0,   0));
+                                    Point(   0,   0,   0)));
                                     
-const Matrix Deuteranomaly = Affine(Vector( .8,  .2,   0),
+const Matrix Deuteranomaly = Transpose(Affine(Vector( .8,  .2,   0),
                                     Vector(.26, .74,   0),
                                     Vector(  0, .14, .86),
-                                    Point(   0,   0,   0));
+                                    Point(   0,   0,   0)));
                                     
-const Matrix Tritanopia =    Affine(Vector(.95, .05,   0),
+const Matrix Tritanopia =    Transpose(Affine(Vector(.95, .05,   0),
                                     Vector(  0, .43, .57), 
                                     Vector(  0, .48, .53),
-                                    Point(   0,   0,   0));
+                                    Point(   0,   0,   0)));
                                     
-const Matrix Tritanomaly =   Affine(Vector(.97, .03,   0),
+const Matrix Tritanomaly =   Transpose(Affine(Vector(.97, .03,   0),
                                     Vector(  0, .73, .27),
                                     Vector(  0, .18, .82),
-                                    Point(   0,   0,   0));
+                                    Point(   0,   0,   0)));
                                     
-const Matrix Achromatopsia = Affine(Vector( .3, .59, .11),
+const Matrix Achromatopsia = Transpose(Affine(Vector( .3, .59, .11),
                                     Vector( .3, .59, .11),
                                     Vector( .3, .59, .11),
-                                    Point(   0,   0,   0));
+                                    Point(   0,   0,   0)));
                                     
-const Matrix Achromatomaly = Affine(Vector(.62, .32, .06),
+const Matrix Achromatomaly = Transpose(Affine(Vector(.62, .32, .06),
                                     Vector(.16, .78, .06),
                                     Vector(.16, .32, .52),
-                                    Point(   0,   0,   0));
+                                    Point(   0,   0,   0)));
 const Matrix InverseM = Affine(Vector(-1,0,0),
                               Vector(0,-1,0),
                               Vector(0,0,-1),
@@ -73,6 +73,8 @@ const Matrix ProAdjustment = Transpose(Scale(1.f/65536.f)*
                                            Point(0,0,0)));
 
 const Matrix Compensation2 = Transpose(Affine(Vector(0, 0.0332818, -0.0877292),Vector(0, 0.033282, -0.0877289),Vector(0, -0.00486077, 0.694434),Point(0,0,0)));
+
+const Matrix SuperBoosted = Scale(64) * Trans(Vector(-0.7f,-0.7f,-0.7f));
 
 const Matrix Inversion = Scale(-1) * Trans(Vector(-1,-1,-1));
 
@@ -99,7 +101,22 @@ void loop() {
     Three = &ProAdjustment;
     break;
     case 2:
+    One = &Deuteranopia;
+    Two = &ProCompensation;
+    Three = &ProAdjustment;
+    break;
+    case 3:
+    One = &Tritanopia;
+    Two = &ProCompensation;
+    Three = &ProAdjustment;
+    break;
+    case 4:
     One = &Inversion;
+    Two = &Normal;
+    Three = &Normal;
+    break;
+    case 5:
+    One = &SuperBoosted;
     Two = &Normal;
     Three = &Normal;
     break;
