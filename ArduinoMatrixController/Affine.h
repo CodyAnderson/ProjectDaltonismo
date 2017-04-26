@@ -30,6 +30,8 @@ struct Vector : Hcoord {
 
 
 struct Matrix {
+  Matrix(){}
+  Matrix(Hcoord u, Hcoord v, Hcoord w, Hcoord p){row[0] = u; row[1] = v; row[2] = w; row[3] = p;}
   Hcoord row[4];
   Hcoord& operator[](int i) { return row[i]; }
   const Hcoord& operator[](int i) const { return row[i]; }
@@ -50,6 +52,7 @@ Hcoord operator-(const Hcoord& v);
 Hcoord operator*(float r, const Hcoord& v);
 Hcoord operator*(const Matrix& A, const Hcoord& v);
 Matrix operator*(const Matrix& A, const Matrix& B);
+Matrix operator+(const Matrix& u, const Matrix& v);
 float dot(const Vector& u, const Vector& v);
 //float abs(const Vector& v);
 Vector normalize(const Vector& v);

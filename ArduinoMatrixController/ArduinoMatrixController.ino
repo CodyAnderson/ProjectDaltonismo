@@ -1,5 +1,11 @@
 #include "Affine.h"
 
+#define LEFT_BTN 8
+#define RIGHT_BTN 9
+#define CENTER_BTN 10
+#define STATE_MAX 5
+#define TRANSITION_INCREMENT 0.1f
+
 // Matrix one = simulation....
 // Matrix two = compensation...
 // Matrix three = adjustment...
@@ -68,63 +74,138 @@ const Matrix ProAdjustment = Transpose(Scale(1.f/65536.f)*
 
 const Matrix Compensation2 = Transpose(Affine(Vector(0, 0.0332818, -0.0877292),Vector(0, 0.033282, -0.0877289),Vector(0, -0.00486077, 0.694434),Point(0,0,0)));
 
+const Matrix Inversion = Scale(-1) * Trans(Vector(-1,-1,-1));
+
 void setup() {
   // initialize the serial communication:
   Serial.begin(2000000);
   //Serial.begin(115200);
-  pinMode(A0, INPUT);
-  pinMode(A1, INPUT);
-  pinMode(A2, INPUT);
+  pinMode(3, INPUT);
+  pinMode(8, INPUT);
+  pinMode(9, INPUT);
+  pinMode(10, INPUT);
 }
 
 void loop() {
-    const double rwgt = 0.3333;// 0.3086;
-    const double gwgt = 0.3334;// 0.6094;
-    const double bwgt = 0.3333;// 0.0820;
-    double sat;//= ;
-    static float time = 0;
-    sat = (float)analogRead(A0) / 64 - (1024/128);
-    time += (float)analogRead(A1)/1024;
-    //PrintMatrix(Rot(time, Vector(1,1,1))*Scale(sat), 1);
-    while(1)
-    {
-      static double t = 0;
-      t += 0.01;
-      double value;
-      PrintMatrix(Protanopia,1);
-      PrintMatrix(ProCompensation,2);
-      PrintMatrix(ProAdjustment,3);
+  //Determine which effect
+  int state = StateChooser();
+  //Choose effect
+  Matrix *One, *Two, *Three;
+  switch(state)
+  {
+    case 1:
+    One = &Protanopia;
+    Two = &ProCompensation;
+    Three = &ProAdjustment;
+    break;
+    case 2:
+    One = &Inversion;
+    Two = &Normal;
+    Three = &Normal;
+    break;
+    default:
+    One = &Normal;
+    Two = &Normal;
+    Three = &Normal;
+    break;
+  }
+  //Transition effect
+  OutputTripleDeuce(One,Two,Three);
+  //Wait for next frame
+
+      //PrintMatrix(Protanopia,1);
+      //PrintMatrix(ProCompensation,2);
+      //PrintMatrix(ProAdjustment,3);
+
       
-      value = sin(t);
+     // value = sin(t) * 0.5f + 0.5f;
+      //PrintMatrix(Scale(value) * Protanopia + Scale(1-value) * Normal,1);
+      //PrintMatrix(Scale(value) * ProCompensation + Scale(1-value) * Normal,2);
+      //PrintMatrix(Scale(value) * ProAdjustment + Scale(1-value) * Normal,3);
       //PrintMatrix(Scale(128) * Trans(Vector(-value/2-0.5f,-value/2-0.5f,-value/2-0.5f)),1);
     //PrintMatrix(Trans(Vector(value*255 + 255/3, value*255 + 2*255/3, value*255)),1);
-    delay(20);
+    WaitForFrame();
+}
+
+void WaitForFrame()
+{
+  static unsigned long t = 0;
+  while(t + 20 > millis() && !digitalRead(3));
+  t = millis();
+}
+
+void OutputTripleDeuce(Matrix *One, Matrix *Two, Matrix *Three)
+{
+  static Matrix *prevOne = &Normal;
+  static Matrix *prevTwo = &Normal;
+  static Matrix *prevThree = &Normal;
+  static Matrix *transOne = &Normal;
+  static Matrix *transTwo = &Normal;
+  static Matrix *transThree = &Normal;
+  static float t = 0;
+  if(t)
+  {
+    float mue = cos(t) * 0.5f + 0.5f;
+    PrintMatrix(Scale(1-mue) * *transOne + Scale(mue) * *prevOne,1);
+    PrintMatrix(Scale(1-mue) * *transTwo + Scale(mue) * *prevTwo,2);
+    PrintMatrix(Scale(1-mue) * *transThree + Scale(mue) * *prevThree,3);
+    t += TRANSITION_INCREMENT;
+    if(t > 3.1415926)
+    {
+      t = 0;
+      prevOne = transOne;
+      prevTwo = transTwo;
+      prevThree = transThree;
     }
-    //double multiplier = analogRead(A1) + 1;
-    //sat /= 1023/2;
-    //sat -= 1;
-    //multiplier /= 8;
-    //sat *= multiplier;
-    //Serial.println(sat);
-//    Serial.print(" 0x");
-//    Serial.print((int32_t)(((1.0-sat)*rwgt + sat)* 65536),HEX);
-//    Serial.print(" 0x");
-//    Serial.print((int32_t)(((1.0-sat)*gwgt )* 65536),HEX);
-//    Serial.print(" 0x");
-//    Serial.print((int32_t)(((1.0-sat)*bwgt )* 65536),HEX);
-//    Serial.print(" 0x");
-//    Serial.print((int32_t)(((1.0-sat)*rwgt )* 65536),HEX);
-//    Serial.print(" 0x");
-//    Serial.print((int32_t)(((1.0-sat)*gwgt + sat)* 65536),HEX);
-//    Serial.print(" 0x");
-//    Serial.print((int32_t)(((1.0-sat)*bwgt )* 65536),HEX);
-//    Serial.print(" 0x");
-//    Serial.print((int32_t)(((1.0-sat)*rwgt )* 65536),HEX);
-//    Serial.print(" 0x");
-//    Serial.print((int32_t)(((1.0-sat)*gwgt )* 65536),HEX);
-//    Serial.print(" 0x");
-//    Serial.println((int32_t)(((1.0-sat)*bwgt + sat)* 65536),HEX);
-    delay(1000);
+  }
+  else if(One != prevOne || Two != prevTwo || Three != prevThree)
+  {
+    t = TRANSITION_INCREMENT;
+    transOne = One;
+    transTwo = Two;
+    transThree = Three;
+  }
+  else
+  {
+    PrintMatrix(*prevOne,1);
+    PrintMatrix(*prevTwo,2);
+    PrintMatrix(*prevThree,3);
+  }
+}
+
+int StateChooser()
+{
+  // {LEFT_BTN, RIGHT_BTN, CENTER_BTN, ON/OFF}
+  static int state = 0;
+  static int buttonStates = 0;
+  int currentButtonStates = 0;
+  if(!digitalRead(LEFT_BTN))
+  {
+    currentButtonStates |= 1;
+    if((!(buttonStates & 1)) && state)
+      --state;
+  }
+  if(!digitalRead(RIGHT_BTN))
+  {
+    currentButtonStates |= 2;
+    if((!(buttonStates & 2)) && state < STATE_MAX)
+      ++state;
+  }
+  if(!digitalRead(CENTER_BTN))
+  {
+    currentButtonStates |= 4;
+    if(!(buttonStates & 4))
+      if(buttonStates & 8)
+        buttonStates &= ~8;
+      else
+        buttonStates |= 8;
+  }
+  buttonStates = currentButtonStates | (buttonStates & 8);
+  if((buttonStates & 8))
+    return 0;
+  else
+    return state;
+  
 }
 
 void PrintMatrix(const Matrix &m, int spot)

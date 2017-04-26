@@ -49,6 +49,12 @@ Hcoord operator+(const Hcoord& u, const Hcoord& v)
   return Hcoord(u.x + v.x, u.y + v.y, u.z + v.z, u.w + v.w);
 }
 
+Matrix operator+(const Matrix& u, const Matrix& v)
+{
+  
+  return Matrix(u[0]+v[0],u[1]+v[1],u[2]+v[2],u[3]+v[3]);
+}
+
 Hcoord operator-(const Hcoord& u, const Hcoord& v)
 {
   return Hcoord(u.x - v.x, u.y - v.y, u.z - v.z, u.w - v.w);

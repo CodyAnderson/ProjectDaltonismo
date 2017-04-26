@@ -27,6 +27,7 @@ module top_module(
     input logic clk,
     input logic [7:0]sw,
     input logic ja0,
+    output logic ja1,
     output logic uart_rx_out,
     //input logic btnC,
     
@@ -144,7 +145,7 @@ assign uart_tx_in = ja0;
   logic [7:0]redDataOut;
   logic [7:0]greenDataOut;
   logic [7:0]blueDataOut;  
-  Filter SuperFilter(HdmiClk,clk, sw[2:0], uart_tx_in, uart_rx_out, syncIn, redDataIn, greenDataIn, blueDataIn, syncOut, redDataOut, greenDataOut, blueDataOut);
+  Filter SuperFilter(HdmiClk,clk, sw[2:0], uart_tx_in, uart_rx_out, syncIn, redDataIn, greenDataIn, blueDataIn, syncOut, redDataOut, greenDataOut, blueDataOut, ja1);
   
 
 

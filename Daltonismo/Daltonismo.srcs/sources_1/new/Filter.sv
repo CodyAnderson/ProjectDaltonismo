@@ -27,14 +27,15 @@ module Filter(
     output logic [2:0] syncOut,
     output logic [7:0] redOut,
     output logic [7:0] greenOut,
-    output logic [7:0] blueOut
+    output logic [7:0] blueOut,
+    output logic ready2receive
     );
 
   
   logic [31:0] matrixOne[16];
   logic [31:0] matrixTwo[16];
   logic [31:0] matrixThree[16];
-  MatrixReceiverBuffered Getter(clk100Mhz, uart_tx_in, syncIn[2], uart_rx_out, matrixOne, matrixTwo, matrixThree);
+  MatrixReceiverBuffered Getter(clk100Mhz, uart_tx_in, syncIn[2], ready2receive, uart_rx_out, matrixOne, matrixTwo, matrixThree);
 
   logic [2:0] syncOutSim;
   logic [7:0] redOutSim;

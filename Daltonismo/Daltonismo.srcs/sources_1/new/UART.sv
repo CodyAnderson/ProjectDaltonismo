@@ -360,7 +360,7 @@ endmodule
 
 module MatrixReceiverBuffered(
         input clk, rx, load,
-        output logic tx,
+        output logic ready2receive, tx,
         logic[NUMBER_OF_BITS-1:0] matrixOneBuffered[16] =   {65536,    0,    0,    0,
                                                                  0,65536,    0,    0,
                                                                  0,    0,65536,    0,
@@ -382,7 +382,7 @@ logic [31:0] matrixOne[16];
   logic [31:0] matrixThree[16];
   logic [2:0]matrixDone;
   logic [2:0]matrixBuffedIn = 3'b0;
-
+  assign ready2receive = !load & !matrixDone;
   MatrixReceiver TripleMatrix(clk, rx, matrixBuffedIn, matrixDone, tx, matrixOne, matrixTwo, matrixThree);
   
   always_ff@(posedge clk)
